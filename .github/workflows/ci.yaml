@@ -15,9 +15,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - infra/aws/tf/**
       - infra/snowflake/tf/**
-      - infra/platform/tf/**
       - input-jsons/**
   workflow_dispatch:
 
