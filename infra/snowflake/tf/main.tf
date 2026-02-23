@@ -50,7 +50,7 @@
 # 1. Warehouses
 # ----------------------------------------------------------------------------
 module "warehouse" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-warehouse?ref=v2.0.0"
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-warehouse?ref=main"
 
   providers = {
     snowflake = snowflake.warehouse_provisioner
@@ -63,7 +63,7 @@ module "warehouse" {
 # 2. Databases and Schemas
 # ----------------------------------------------------------------------------
 module "database_schemas" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-database-schema?ref=v1.2.0"
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-database-schema?ref=main"
 
   providers = {
     snowflake = snowflake.db_provisioner
@@ -76,7 +76,7 @@ module "database_schemas" {
 # 3. File Formats
 # ----------------------------------------------------------------------------
 module "file_formats" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-file-format?ref=v1.2.0"
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-file-format?ref=main"
 
   providers = {
     snowflake = snowflake.data_object_provisioner
@@ -91,7 +91,7 @@ module "file_formats" {
 # 4. Internal Stage
 # ----------------------------------------------------------------------------
 module "stage" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-stage?ref=v1.1.0"
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-stage?ref=main"
 
   providers = {
     snowflake = snowflake.ingest_object_provisioner
@@ -106,7 +106,7 @@ module "stage" {
 # 5. Tables
 # ----------------------------------------------------------------------------
 module "table" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-table?ref=v2.0.0"
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-table?ref=main"
 
   providers = {
     snowflake = snowflake.data_object_provisioner
@@ -138,7 +138,7 @@ resource "snowflake_grant_privileges_to_account_role" "table_grants" {
 # 6. Snowpipes
 # ----------------------------------------------------------------------------
 module "pipe" {
-  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-pipe?ref=v2.0.0"
+  source = "github.com/subhamay-bhattacharyya-tf/terraform-snowflake-pipe?ref=main"
 
   providers = {
     snowflake = snowflake.ingest_object_provisioner
