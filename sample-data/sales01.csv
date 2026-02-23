@@ -1,0 +1,11 @@
+OrderDate,Category,City,Country,CustomerName,Discount,OrderID,PostalCode,ProductName,Profit,Quantity,Region,Sales,Segment,ShipDate,ShipMode,State
+2025-01-05,Furniture,Chicago,United States,Erica Johnson,0.1,US-2025-1001,60610,Office Chair,45.67,3,Central,456.70,Consumer,2025-01-09,Standard Class,Illinois
+2025-01-12,Technology,New York City,United States,Michael Brown,0.0,US-2025-1002,10001,Smartphone,120.50,1,East,241.00,Corporate,2025-01-16,Second Class,New York
+2025-01-18,Office Supplies,Los Angeles,United States,Jessica Davis,0.2,US-2025-1003,90001,Paper Clips,-5.20,5,West,26.00,Home Office,2025-01-22,Standard Class,California
+2025-01-25,Furniture,Houston,United States,David Wilson,0.3,US-2025-1004,77002,Bookcase,-78.90,2,Central,263.00,Consumer,2025-01-29,Standard Class,Texas
+2025-02-01,Technology,Philadelphia,United States,Sarah Garcia,0.15,US-2025-1005,19102,Wireless Mouse,15.75,4,East,105.00,Corporate,2025-02-05,First Class,Pennsylvania
+2025-02-08,Office Supplies,Seattle,United States,Robert Rodriguez,0.0,US-2025-1006,98101,Pens,8.40,7,West,58.80,Home Office,2025-02-12,Standard Class,Washington
+2025-02-15,Furniture,Dallas,United States,Linda Williams,0.25,US-2025-1007,75201,Table,-112.50,1,Central,450.00,Consumer,2025-02-19,Second Class,Texas
+2025-02-22,Technology,Boston,United States,Christopher Jones,0.05,US-2025-1008,02108,Headphones,22.10,2,East,44.20,Corporate,2025-02-26,Standard Class,Massachusetts
+2025-03-01,Office Supplies,Denver,United States,Ashley Martinez,0.1,US-2025-1009,80202,Stapler,3.60,6,West,36.00,Home Office,2025-03-05,First Class,Colorado
+2025-03-08,Furniture,Miami,United States,Kevin Anderson,0.35,US-2025-1010,33101,Sofa,-205.00,1,South,585.70,Consumer,2025-03-12,Standard Class,Florida

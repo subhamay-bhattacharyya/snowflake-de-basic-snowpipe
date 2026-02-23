@@ -1,0 +1,21 @@
+OrderDate,Category,City,Country,CustomerName,Discount,OrderID,PostalCode,ProductName,Profit,Quantity,Region,Sales,Segment,ShipDate,ShipMode,State
+2025-03-15,Technology,Atlanta,United States,Brittany Thomas,0.0,US-2025-1011,30303,Monitor,75.20,2,South,300.80,Corporate,2025-03-19,Second Class,Georgia
+2025-03-22,Office Supplies,Phoenix,United States,Justin White,0.12,US-2025-1012,85001,Binder,-10.50,3,West,35.00,Home Office,2025-03-26,Standard Class,Arizona
+2025-03-29,Furniture,Charlotte,United States,Stephanie Hall,0.4,US-2025-1013,28202,Office Desk,-180.00,1,South,600.00,Consumer,2025-04-02,Standard Class,North Carolina
+2025-04-05,Technology,San Francisco,United States,Brandon Lewis,0.08,US-2025-1014,94102,Keyboard,28.90,5,West,144.50,Corporate,2025-04-09,First Class,California
+2025-04-12,Office Supplies,Orlando,United States,Nicole Scott,0.0,US-2025-1015,32801,Scissors,2.10,10,South,21.00,Home Office,2025-04-16,Standard Class,Florida
+2025-04-19,Furniture,Detroit,United States,Patrick Green,0.3,US-2025-1016,48201,Chair Mat,-35.60,2,Central,118.70,Consumer,2025-04-23,Second Class,Michigan
+2025-04-26,Technology,San Diego,United States,Tiffany Baker,0.18,US-2025-1017,92101,Webcam,41.25,3,West,137.50,Corporate,2025-04-30,Standard Class,California
+2025-05-03,Office Supplies,Tampa,United States,Jeremy Adams,0.05,US-2025-1018,33602,Envelopes,6.80,8,South,54.40,Home Office,2025-05-07,First Class,Florida
+2025-05-10,Furniture,Minneapolis,United States,Kimberly King,0.22,US-2025-1019,55401,Filing Cabinet,-95.10,1,Central,432.30,Consumer,2025-05-14,Standard Class,Minnesota
+2025-05-17,Technology,Austin,United States,Joshua Wright,0.0,US-2025-1020,78701,Projector,185.90,1,Central,371.80,Corporate,2025-05-21,Second Class,Texas
+2025-05-24,Office Supplies,St. Louis,United States,Angela Hill,0.1,US-2025-1021,63101,Markers,4.50,5,Central,22.50,Home Office,2025-05-28,Standard Class,Missouri
+2025-05-31,Furniture,Nashville,United States,Gregory Roberts,0.38,US-2025-1022,37201,Ottoman,-55.70,2,South,146.60,Consumer,2025-06-04,First Class,Tennessee
+2025-06-07,Technology,Portland,United States,Debra Flores,0.07,US-2025-1023,97201,External Hard Drive,32.15,4,West,128.60,Corporate,2025-06-11,Standard Class,Oregon
+2025-06-14,Office Supplies,New Orleans,United States,Raymond Gray,0.0,US-2025-1024,70112,Notebooks,11.20,6,South,67.20,Home Office,2025-06-18,Second Class,Louisiana
+2025-06-21,Furniture,Cincinnati,United States,Melissa Hayes,0.2,US-2025-1025,45202,Side Table,-29.40,3,Central,147.00,Consumer,2025-06-25,Standard Class,Ohio
+2025-06-28,Technology,Sacramento,United States,Roy Torres,0.15,US-2025-1026,95814,Smartwatch,68.50,2,West,137.00,Corporate,2025-07-02,First Class,California
+2025-07-05,Office Supplies,Kansas City,United States,Laura Cooper,0.0,US-2025-1027,64105,Highlighters,1.90,12,Central,22.80,Home Office,2025-07-09,Standard Class,Missouri
+2025-07-12,Furniture,Richmond,United States,Adam Ellis,0.32,US-2025-1028,23219,Loveseat,-155.20,1,South,485.00,Consumer,2025-07-16,Second Class,Virginia
+2025-07-19,Technology,Buffalo,United States,Tammy Rogers,0.03,US-2025-1029,14202,Tablet,110.75,1,East,221.50,Corporate,2025-07-23,Standard Class,New York
+2025-07-26,Office Supplies,Hartford,United States,Carl Sanders,0.0,US-2025-1030,06103,Erasers,0.50,15,East,7.50,Home Office,2025-07-30,First Class,Connecticut
