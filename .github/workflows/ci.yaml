@@ -8,9 +8,7 @@ on:
       - 'feature/**'
       - 'bug/**'
     paths:
-      - infra/aws/tf/**
       - infra/snowflake/tf/**
-      - infra/platform/tf/**
       - input-jsons/**
   pull_request:
     branches: [main]
@@ -32,7 +30,7 @@ jobs:
     name: CI
     uses: subhamay-bhattacharyya-gha/tf-ci-reusable-wf/.github/workflows/ci.yaml@feature/GHA-0037-add-platform-based-multi
     with:
-      cloud-provider: platform
+      cloud-provider: snowflake
       tflint-ver: ${{ vars.TF_LINT_VER }}
       backend-type: remote
       tf-vars-file: terraform.tfvars
