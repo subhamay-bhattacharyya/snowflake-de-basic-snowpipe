@@ -12,7 +12,7 @@ terraform {
       version = ">= 5.0"
     }
     snowflake = {
-      source  = "snowflakedb/snowflake"
+      source  = "Snowflake-Labs/snowflake"
       version = ">= 1.0.0"
     }
     random = {
