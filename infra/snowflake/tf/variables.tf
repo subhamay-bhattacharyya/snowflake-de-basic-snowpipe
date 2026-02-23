@@ -3,16 +3,16 @@
 # Snowflake Module Variables
 # ============================================================================
 
-variable "environment" {
-  description = "Environment name (devl, test, prod)"
-  type        = string
-  default     = "devl"
-
-  validation {
-    condition     = contains(["devl", "test", "prod"], var.environment)
-    error_message = "Environment must be devl, test, or prod."
-  }
-}
+# variable "environment" {
+#   description = "Environment name (devl, test, prod)"
+#   type        = string
+#   default     = "devl"
+#
+#   validation {
+#     condition     = contains(["devl", "test", "prod"], var.environment)
+#     error_message = "Environment must be devl, test, or prod."
+#   }
+# }
 
 variable "project_code" {
   description = "Project code prefix for resource naming (e.g., snw-lkh)"
