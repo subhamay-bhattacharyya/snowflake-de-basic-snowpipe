@@ -109,22 +109,21 @@ This project implements a **least-privilege governance model** using dedicated a
 #### Role Hierarchy & Responsibilities
 
 ```
-                            ACCOUNTADMIN
-                                 │
-                    ┌────────────┼────────────┐
-                    │            │            │
-                    ▼            ▼            ▼
-               SYSADMIN    SECURITYADMIN   USERADMIN
-                    │
-        ┌───────────┼───────────┬───────────┐
-        │           │           │           │
-        ▼           ▼           ▼           ▼
-  WAREHOUSE_    PLATFORM_   DATA_OBJECT_  INGEST_
-    ADMIN       DB_ADMIN      ADMIN        ADMIN
-        │           │           │           │
-        ▼           ▼           ▼           ▼
-   Warehouses   Databases   File Formats  Stages
-                Schemas     Tables        Snowpipes
+                                    ACCOUNTADMIN
+                                         │
+                          ┌──────────────┼──────────────┐
+                          │              │              │
+                          ▼              ▼              ▼
+                     SYSADMIN      SECURITYADMIN    USERADMIN
+                          │
+      ┌───────────────────┼───────────────────┬───────────────────┐
+      │                   │                   │                   │
+      ▼                   ▼                   ▼                   ▼
+WAREHOUSE_ADMIN    PLATFORM_DB_ADMIN   DATA_OBJECT_ADMIN    INGEST_ADMIN
+      │                   │                   │                   │
+      ▼                   ▼                   ▼                   ▼
+ Warehouses          Databases          File Formats          Stages
+                     Schemas            Tables                Snowpipes
 ```
 
 #### Role Details
@@ -290,6 +289,45 @@ GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE WAREHOUSE_ADMIN;
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE PLATFORM_DB_ADMIN;
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE DATA_OBJECT_ADMIN;
 GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE INGEST_ADMIN;
+```
+
+#### Setting Up Analyst Role (Read-Only)
+
+Run the following SQL as `ACCOUNTADMIN` to create a read-only analyst role:
+
+```sql
+-- ============================================================================
+-- Create Analyst Role for Read-Only Access
+-- ============================================================================
+
+-- 1. Create the analyst role
+CREATE ROLE IF NOT EXISTS ANALYST
+  COMMENT = 'Read-only access to query tables and views';
+
+-- 2. Set up role hierarchy (ANALYST reports to SYSADMIN)
+GRANT ROLE ANALYST TO ROLE SYSADMIN;
+
+-- 3. Grant warehouse usage for query execution
+GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE ANALYST;
+
+-- 4. Grant database and schema usage (read-only)
+GRANT USAGE ON DATABASE <DATABASE_NAME> TO ROLE ANALYST;
+GRANT USAGE ON SCHEMA <DATABASE_NAME>.<SCHEMA_NAME> TO ROLE ANALYST;
+
+-- 5. Grant SELECT on all existing tables in schema
+GRANT SELECT ON ALL TABLES IN SCHEMA <DATABASE_NAME>.<SCHEMA_NAME> TO ROLE ANALYST;
+
+-- 6. Grant SELECT on all existing views in schema
+GRANT SELECT ON ALL VIEWS IN SCHEMA <DATABASE_NAME>.<SCHEMA_NAME> TO ROLE ANALYST;
+
+-- 7. Grant SELECT on future tables (auto-grant for new tables)
+GRANT SELECT ON FUTURE TABLES IN SCHEMA <DATABASE_NAME>.<SCHEMA_NAME> TO ROLE ANALYST;
+
+-- 8. Grant SELECT on future views (auto-grant for new views)
+GRANT SELECT ON FUTURE VIEWS IN SCHEMA <DATABASE_NAME>.<SCHEMA_NAME> TO ROLE ANALYST;
+
+-- 9. Grant role to analyst users
+GRANT ROLE ANALYST TO USER <ANALYST_USERNAME>;
 ```
 
 #### Post-Database Creation Grants
