@@ -48,47 +48,44 @@ This repository implements a complete Snowflake data pipeline with:
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  1. WAREHOUSES                                              │
-├─────────────────────────────────────────────────────────────┤
-│  Compute resources for query execution                      │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  2. DATABASES & SCHEMAS                                     │
-├─────────────────────────────────────────────────────────────┤
-│  Logical containers for data organization                   │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  3. FILE FORMATS                                            │
-├─────────────────────────────────────────────────────────────┤
-│  Define parsing rules for data files (CSV, JSON, etc.)      │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  4. INTERNAL STAGES                                         │
-├─────────────────────────────────────────────────────────────┤
-│  Named storage locations for file staging                   │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  5. TABLES                                                  │
-├─────────────────────────────────────────────────────────────┤
-│  Target tables for data ingestion                           │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│  6. SNOWPIPES                                               │
-├─────────────────────────────────────────────────────────────┤
-│  Auto-ingest pipelines for continuous data loading          │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph WAREHOUSES["1. WAREHOUSES"]
+        WH[Compute resources for query execution]
+    end
+
+    subgraph DATABASES["2. DATABASES & SCHEMAS"]
+        DB[Logical containers for data organization]
+    end
+
+    subgraph FILEFORMATS["3. FILE FORMATS"]
+        FF[Define parsing rules for data files<br/>CSV, JSON, etc.]
+    end
+
+    subgraph STAGES["4. INTERNAL STAGES"]
+        STG[Named storage locations for file staging]
+    end
+
+    subgraph TABLES["5. TABLES"]
+        TBL[Target tables for data ingestion]
+    end
+
+    subgraph SNOWPIPES["6. SNOWPIPES"]
+        PIPE[Auto-ingest pipelines for<br/>continuous data loading]
+    end
+
+    WAREHOUSES --> DATABASES
+    DATABASES --> FILEFORMATS
+    FILEFORMATS --> STAGES
+    STAGES --> TABLES
+    TABLES --> SNOWPIPES
+
+    style WAREHOUSES fill:#e1f5fe,stroke:#01579b
+    style DATABASES fill:#e8f5e9,stroke:#1b5e20
+    style FILEFORMATS fill:#fff3e0,stroke:#e65100
+    style STAGES fill:#f3e5f5,stroke:#4a148c
+    style TABLES fill:#fce4ec,stroke:#880e4f
+    style SNOWPIPES fill:#e0f2f1,stroke:#004d40
 ```
 
 ## Security & Governance
