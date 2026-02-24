@@ -400,10 +400,9 @@ Set up GitHub Actions authentication. Navigate to **Settings → Secrets and var
 
 | Variable Name | Description | Example |
 |---------------|-------------|---------|
-| `SNOWFLAKE_ORGANIZATION_NAME` | Snowflake organization name | `AGXUOKJ` |
-| `SNOWFLAKE_ACCOUNT_NAME` | Snowflake account name | `JKC15404` |
+| `SNOWFLAKE_ORGANIZATION_NAME` | Snowflake organization name | `XXXXXXX` |
+| `SNOWFLAKE_ACCOUNT_NAME` | Snowflake account name | `XXXXXXX` |
 | `SNOWFLAKE_USER` | Service account username | `GITHUB_ACTIONS_USER` |
-| `SNOWFLAKE_ROLE` | Snowflake role for deployments | `SYSADMIN` |
 | `TF_LINT_VER` | TFLint version (optional) | `v0.50.0` |
 
 #### Required Repository Secrets
