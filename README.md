@@ -248,47 +248,87 @@ resource "snowflake_grant_privileges_to_account_role" "table_grants" {
 
 #### Setting Up Admin Roles
 
-Run the following SQL as `ACCOUNTADMIN` to create the admin roles:
+Run this SQL in Snowflake (replace `YOUR_PUBLIC_KEY_HERE` with the output from Step 1):
 
 ```sql
 -- ============================================================================
--- Create Admin Roles for Snowflake Governance
+-- Snowflake: GitHub Actions Service User + Core Automation Roles (Hardened)
+--
+-- Creates:
+--   • User: GITHUB_ACTIONS_USER (key-pair auth; default role PUBLIC; no default WH)
+--   • Roles:
+--       - PLATFORM_DB_OWNER   (CREATE DATABASE)
+--       - DATA_OBJECT_ADMIN   (no privileges granted here; typically schema-scoped later)
+--       - INGEST_ADMIN        (no privileges granted here; typically integration/stage/pipe scoped later)
+--       - WAREHOUSE_ADMIN     (CREATE WAREHOUSE)
+--   • Grants all roles to the GitHub Actions user
+--
+-- Run as: SECURITYADMIN (recommended)
+-- Replace:
+--   - RSA_PUBLIC_KEY value below
 -- ============================================================================
 
--- 1. Create the admin roles
-CREATE ROLE IF NOT EXISTS WAREHOUSE_ADMIN
-  COMMENT = 'Manages warehouse lifecycle - create, modify, monitor';
+USE ROLE SECURITYADMIN;
 
-CREATE ROLE IF NOT EXISTS PLATFORM_DB_ADMIN
-  COMMENT = 'Manages databases and schemas';
+-- ----------------------------------------------------------------------------
+-- 1) Create Roles
+-- ----------------------------------------------------------------------------
+CREATE ROLE IF NOT EXISTS PLATFORM_DB_OWNER;
+CREATE ROLE IF NOT EXISTS DATA_OBJECT_ADMIN;
+CREATE ROLE IF NOT EXISTS INGEST_ADMIN;
+CREATE ROLE IF NOT EXISTS WAREHOUSE_ADMIN;
 
-CREATE ROLE IF NOT EXISTS DATA_OBJECT_ADMIN
-  COMMENT = 'Manages file formats and tables';
+-- ----------------------------------------------------------------------------
+-- 2) Grant Account-level Privileges (only where applicable)
+-- ----------------------------------------------------------------------------
 
-CREATE ROLE IF NOT EXISTS INGEST_ADMIN
-  COMMENT = 'Manages stages and snowpipes for data ingestion';
+USE ROLE ACCOUNTADMIN;
+-- PLATFORM_DB_OWNER: create databases (account-level)
+GRANT CREATE DATABASE ON ACCOUNT TO ROLE PLATFORM_DB_OWNER;
 
--- 2. Grant account-level privileges
+
+-- WAREHOUSE_ADMIN: create warehouses (account-level)
 GRANT CREATE WAREHOUSE ON ACCOUNT TO ROLE WAREHOUSE_ADMIN;
-GRANT CREATE DATABASE ON ACCOUNT TO ROLE PLATFORM_DB_ADMIN;
 
--- 3. Set up role hierarchy (roles inherit from SYSADMIN)
-GRANT ROLE WAREHOUSE_ADMIN TO ROLE SYSADMIN;
-GRANT ROLE PLATFORM_DB_ADMIN TO ROLE SYSADMIN;
-GRANT ROLE DATA_OBJECT_ADMIN TO ROLE SYSADMIN;
-GRANT ROLE INGEST_ADMIN TO ROLE SYSADMIN;
+-- Optional but recommended: allow visibility into account/warehouse usage
+GRANT MONITOR USAGE ON ACCOUNT TO ROLE WAREHOUSE_ADMIN;
+GRANT USAGE ON WAREHOUSE UTIL_WH TO ROLE WAREHOUSE_ADMIN;
+GRANT CREATE INTEGRATION ON ACCOUNT TO ROLE INGEST_ADMIN;
 
--- 4. Grant roles to service account (for Terraform)
-GRANT ROLE WAREHOUSE_ADMIN TO USER TF_SERVICE_ACCOUNT;
-GRANT ROLE PLATFORM_DB_ADMIN TO USER TF_SERVICE_ACCOUNT;
-GRANT ROLE DATA_OBJECT_ADMIN TO USER TF_SERVICE_ACCOUNT;
-GRANT ROLE INGEST_ADMIN TO USER TF_SERVICE_ACCOUNT;
+-- NOTE:
+-- DATA_OBJECT_ADMIN and INGEST_ADMIN are intentionally left with NO privileges here.
+-- They should be granted schema/database/integration-specific privileges later in Terraform,
+-- once the target database/schema/integrations exist (JSON-driven).
 
--- 5. Grant warehouse usage to all admin roles
-GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE WAREHOUSE_ADMIN;
-GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE PLATFORM_DB_ADMIN;
-GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE DATA_OBJECT_ADMIN;
-GRANT USAGE ON WAREHOUSE COMPUTE_WH TO ROLE INGEST_ADMIN;
+-- ----------------------------------------------------------------------------
+-- 3) Create GitHub Actions Service User (Key-Pair Auth Only)
+-- ----------------------------------------------------------------------------
+CREATE USER IF NOT EXISTS GITHUB_ACTIONS_USER
+  LOGIN_NAME           = 'GITHUB_ACTIONS_USER'
+  DISPLAY_NAME         = 'GitHub Actions Service User'
+  DEFAULT_ROLE         = PUBLIC
+  DEFAULT_WAREHOUSE    = NULL
+  MUST_CHANGE_PASSWORD = FALSE
+  DISABLED             = FALSE
+  RSA_PUBLIC_KEY       = 'YOUR_PUBLIC_KEY_HERE';
+
+-- ----------------------------------------------------------------------------
+-- 4) Grant Roles to GitHub Actions User (NOT default)
+-- ----------------------------------------------------------------------------
+GRANT ROLE PLATFORM_DB_OWNER TO USER GITHUB_ACTIONS_USER;
+GRANT ROLE DATA_OBJECT_ADMIN TO USER GITHUB_ACTIONS_USER;
+GRANT ROLE INGEST_ADMIN      TO USER GITHUB_ACTIONS_USER;
+GRANT ROLE WAREHOUSE_ADMIN   TO USER GITHUB_ACTIONS_USER;
+
+-- ----------------------------------------------------------------------------
+-- 5) Verification
+-- ----------------------------------------------------------------------------
+SHOW USERS LIKE 'GITHUB_ACTIONS_USER';
+SHOW GRANTS TO USER GITHUB_ACTIONS_USER;
+SHOW GRANTS TO ROLE PLATFORM_DB_OWNER;
+SHOW GRANTS TO ROLE DATA_OBJECT_ADMIN;
+SHOW GRANTS TO ROLE INGEST_ADMIN;
+SHOW GRANTS TO ROLE WAREHOUSE_ADMIN;
 ```
 
 #### Setting Up Analyst Role (Read-Only)
@@ -348,6 +388,51 @@ GRANT CREATE STAGE ON SCHEMA <DATABASE_NAME>.<SCHEMA_NAME> TO ROLE INGEST_ADMIN;
 GRANT CREATE PIPE ON SCHEMA <DATABASE_NAME>.<SCHEMA_NAME> TO ROLE INGEST_ADMIN;
 ```
 
+**Security Notes:**
+- ✅ Use `SYSADMIN` role for all DDL and grant operations
+- ✅ Grant `MANAGE GRANTS` privilege to SYSADMIN for permission management
+- ✅ Key-pair authentication is more secure than passwords
+- ✅ Service accounts provide better audit trails
+- ✅ Never commit private keys to the repository
+
+### 2. Configure GitHub Secrets and Variables
+
+Set up GitHub Actions authentication. Navigate to **Settings → Secrets and variables → Actions**.
+
+#### Required Repository Variables
+
+| Variable Name | Description | Example |
+|---------------|-------------|---------|
+| `SNOWFLAKE_ORGANIZATION_NAME` | Snowflake organization name | `AGXUOKJ` |
+| `SNOWFLAKE_ACCOUNT_NAME` | Snowflake account name | `JKC15404` |
+| `SNOWFLAKE_USER` | Service account username | `GITHUB_ACTIONS_USER` |
+| `SNOWFLAKE_ROLE` | Snowflake role for deployments | `SYSADMIN` |
+| `TF_LINT_VER` | TFLint version (optional) | `v0.50.0` |
+
+#### Required Repository Secrets
+
+| Secret Name | Description |
+|-------------|-------------|
+| `SNOWFLAKE_PRIVATE_KEY` | Content of `snowflake_key.p8` file (including `-----BEGIN/END PRIVATE KEY-----` headers) |
+| `TF_TOKEN_APP_TERRAFORM_IO` | Terraform Cloud API token for remote backend |
+
+#### How to Get These Values
+
+**Snowflake Variables:**
+1. Log into Snowflake
+2. Organization name: Found in your account URL (`https://<org>-<account>.snowflakecomputing.com`)
+3. Account name: Same as above
+4. User/Role: Created in the service account setup (Step 1)
+
+**Snowflake Private Key:**
+1. Generated in Step 1 (`snowflake_key.p8`)
+2. Copy the entire file content including headers
+
+**Terraform Cloud Token:**
+1. Go to [Terraform Cloud](https://app.terraform.io)
+2. Navigate to **User Settings → Tokens**
+3. Create a new API token
+
 ## Configuration
 
 ### JSON Configuration File
@@ -403,7 +488,6 @@ Key variables in `variables.tf`:
 | Terraform | >= 1.14.1 | Infrastructure as Code |
 | Snowflake Account | Enterprise or higher | Data platform |
 | GitHub Account | - | CI/CD and repository hosting |
-| AWS Account | - | S3 storage for external stages (optional) |
 | OpenSSL | >= 1.1.1 | Key pair generation |
 
 ### Step 1: One-Time Snowflake Setup
@@ -516,7 +600,9 @@ Navigate to **Settings > Secrets and variables > Actions > Variables** and add:
 
 ### Step 4: Configure GitHub Codespaces (Optional)
 
-If using GitHub Codespaces for development, add secrets at the user level:
+If using GitHub Codespaces for development, add secrets at the user level.
+
+#### 4.1 Add Codespaces Secrets
 
 Navigate to **GitHub Settings > Codespaces > Secrets** and add:
 
@@ -527,69 +613,16 @@ Navigate to **GitHub Settings > Codespaces > Secrets** and add:
 | `SNOWFLAKE_USER` | `TF_SERVICE_ACCOUNT` |
 | `SNOWFLAKE_PRIVATE_KEY` | Contents of private key file |
 
-### Step 5: AWS OIDC Setup (For External Stages)
+### Step 5: Clone and Deploy
 
-If using S3 external stages, configure AWS OIDC for secure cross-account access.
-
-#### 5.1 Create IAM OIDC Identity Provider
-
-```bash
-# Get Snowflake's OIDC issuer URL
-# Format: https://<account>.snowflakecomputing.com
-
-# Create OIDC provider in AWS (via Console or CLI)
-aws iam create-open-id-connect-provider \
-  --url "https://<org>-<account>.snowflakecomputing.com" \
-  --client-id-list "https://<org>-<account>.snowflakecomputing.com" \
-  --thumbprint-list "<thumbprint>"
-```
-
-#### 5.2 Create IAM Role for Snowflake
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Federated": "arn:aws:iam::<AWS_ACCOUNT_ID>:oidc-provider/<org>-<account>.snowflakecomputing.com"
-      },
-      "Action": "sts:AssumeRoleWithWebIdentity",
-      "Condition": {
-        "StringEquals": {
-          "<org>-<account>.snowflakecomputing.com:sub": "<snowflake_storage_integration_arn>"
-        }
-      }
-    }
-  ]
-}
-```
-
-#### 5.3 Create Storage Integration in Snowflake
-
-```sql
-CREATE STORAGE INTEGRATION IF NOT EXISTS S3_INTEGRATION
-  TYPE = EXTERNAL_STAGE
-  STORAGE_PROVIDER = 'S3'
-  ENABLED = TRUE
-  STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::<AWS_ACCOUNT_ID>:role/snowflake-s3-access'
-  STORAGE_ALLOWED_LOCATIONS = ('s3://your-bucket/path/');
-
--- Get the AWS IAM user ARN and external ID for trust policy
-DESC STORAGE INTEGRATION S3_INTEGRATION;
-```
-
-### Step 6: Clone and Deploy
-
-#### 6.1 Clone Repository
+#### 5.1 Clone Repository
 
 ```bash
 git clone https://github.com/subhamay-bhattacharyya/snowflake-de-basic-snowpipe.git
 cd snowflake-de-basic-snowpipe
 ```
 
-#### 6.2 Configure Resources
+#### 5.2 Configure Resources
 
 Edit `input-jsons/snowflake/config.json` with your resource definitions:
 
@@ -618,7 +651,7 @@ Edit `input-jsons/snowflake/config.json` with your resource definitions:
 }
 ```
 
-#### 6.3 Local Deployment
+#### 5.3 Local Deployment
 
 ```bash
 # Set environment variables
@@ -634,7 +667,7 @@ terraform plan
 terraform apply
 ```
 
-#### 6.4 CI/CD Deployment
+#### 5.4 CI/CD Deployment
 
 Push to the `main` branch to trigger the GitHub Actions workflow:
 
@@ -711,9 +744,63 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat: add new feature
 fix: bug fix
-docs: documentation changes
-refactor: code refactoring
+### Commit Message Convention
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated changelog generation. Please format your commit messages as follows:
+
 ```
+<type>: <description>
+
+[optional body]
+```
+
+#### Commit Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `feat` | New feature or functionality | `feat: add Azure storage integration support` |
+| `fix` | Bug fix | `fix: correct IAM trust policy condition` |
+| `docs` | Documentation changes | `docs: update README with setup instructions` |
+| `style` | Code style changes (formatting, whitespace) | `style: fix indentation in main.tf` |
+| `refactor` | Code refactoring without feature changes | `refactor: simplify locals.tf configuration` |
+| `perf` | Performance improvements | `perf: optimize warehouse query execution` |
+| `test` | Adding or updating tests | `test: add validation for warehouse config` |
+| `chore` | Maintenance tasks, dependencies | `chore: update Terraform provider versions` |
+| `ci` | CI/CD configuration changes | `ci: add changelog generation to workflow` |
+
+#### Examples
+
+```bash
+# Feature
+git commit -m "feat: add Snowpipe auto-ingest configuration"
+
+# Bug fix
+git commit -m "fix: resolve storage integration ARN reference"
+
+# Documentation
+git commit -m "docs: add commit message guidelines to README"
+
+# With scope (optional)
+git commit -m "feat(snowflake): add file format support for Parquet"
+
+# With breaking change
+git commit -m "feat!: change storage integration naming convention"
+```
+
+#### Why This Matters
+
+- Commits are automatically categorized in the changelog
+- Release notes are generated from commit messages
+- Makes it easier to understand project history
+- Enables semantic versioning automation
+
+### Development Workflow
+
+1. Create a feature branch from `main`
+2. Make your changes
+3. Test in dev environment
+4. Create a pull request with description
+5. Wait for approval and automated deployment
 
 ## License
 
@@ -721,5 +808,16 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 ## Support
 
+For issues and questions:
 - Open an issue in this repository
-- Check [Snowflake documentation](https://docs.snowflake.com/)
+- Check existing documentation in the `docs/` folder
+- Review [Snowflake documentation](https://docs.snowflake.com/)
+
+## Roadmap
+
+- [ ] Add data quality checks
+- [ ] Implement dbt integration
+- [ ] Add monitoring and alerting
+- [ ] Create CI/CD for data pipelines
+- [ ] Add Streamlit dashboards
+- [ ] Implement dynamic tables
